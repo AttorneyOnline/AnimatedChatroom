@@ -1,0 +1,48 @@
+syntax = "proto3";
+package ac.asset;
+
+message Asset {
+	enum Type {
+		CUSTOM = 0;
+		CHARACTER = 1;
+		MUSIC = 2;
+		SFX = 3;
+		BACKGROUND = 4;
+		THEME = 5;
+	}
+	string name = 1;
+	bytes hash = 2;
+	Type type = 3;
+	// To be handled by other clients and mods
+	string custom_type = 4;
+}
+
+message AssetListRequest {
+
+}
+
+message AssetListResponse {
+	repeated Asset assets = 1;
+}
+
+message AssetDownloadMethodsRequest {
+
+}
+
+message AssetDownloadMethodsResponse {
+	message DownloadMethod {
+		enum Type {
+			HTTP = 0;
+			ASSET_SERVER = 1;
+		}
+		Type download_type = 1;
+		// HTTP: http[s]://example.com/downloads/assets-full.zip
+		// ASSET_SERVER: assets.example.com:27017
+		string url = 2;
+	}
+	repeated DownloadMethod download_methods = 1;
+}
+
+message NewAssetsAvailableBroadcast {
+	repeated Asset new_assets = 1;
+}

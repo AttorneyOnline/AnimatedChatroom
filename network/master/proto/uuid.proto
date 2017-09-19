@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option java_package = "com.aceattorneyonline.master.events";
+option java_outer_classname = "UuidProto";
+
+message Uuid {
+	string id = 1;
+}

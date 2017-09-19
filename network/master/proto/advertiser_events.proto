@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package com.aceattorneyonline.master.events;
+
+option java_outer_classname = "AdvertiserEventProtos";
+
+import "uuid.proto";
+
+// One-shot
+// No commitment required at this time
+message NewAdvertiser {
+	Uuid id = 1;
+}
+
+// No blanks allowed
+// One server per advertiser
+// Flood controlled
+message Heartbeat {
+	Uuid id = 1;
+	uint32 port = 2;
+	string name = 3;
+	string description = 4;
+	string version = 5;
+}
+
+// Flood controlled
+// Can error if not an advertiser
+message Ping {
+	Uuid id = 1;
+}

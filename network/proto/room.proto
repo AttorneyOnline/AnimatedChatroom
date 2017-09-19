@@ -1,0 +1,41 @@
+syntax = "proto3";
+package ac.room;
+
+message JoinRoomRequest {
+	uint32 room_id = 1;
+	uint32 character_id = 2;
+	string password = 3;
+}
+
+message JoinRoomResponse {
+	enum Result {
+		SUCCESS = 0;
+		ROOM_FULL = 1;
+		BAD_PASSWORD = 2;
+		INVALID_REQUEST = 3;
+	}
+	// Response room_id may not be the original room_id
+	// e.g. if redirect occurs
+	uint32 room_id = 1;
+}
+
+message RoomListRequest {
+
+}
+
+message RoomListResponse {
+	repeated Room room_list = 1;
+}
+
+message Room {
+	uint32 room_id = 1;
+	string name = 2;
+	string description = 3;
+	// May be # of unique players or the # of characters taken
+	// (I suggest the former)
+	uint32 players = 4;
+	uint32 players_max = 5;
+	// Whether or not usernames are hidden within rooms
+	// (i.e. you don't know who is who)
+	bool hidden_names = 6;
+}

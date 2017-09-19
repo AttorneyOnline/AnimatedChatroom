@@ -1,0 +1,54 @@
+syntax = "proto3";
+package ac.events;
+
+message ChatEvent {
+	uint32 player_id = 1; // Optional if you are the sender
+	uint32 emote_id = 2;
+	string message_text = 3;
+}
+
+message LeaveEvent {
+	enum Cause {
+		UNEXPECTED = 0;
+		DISCONNECT_BY_USER = 1;
+		KICKED = 2;
+		BANNED = 3;
+	}
+	uint32 player_id = 1;
+	string leave_message = 2;
+}
+
+message JoinEvent {
+	uint32 player_id = 1;
+	string player_name = 2;
+	string character_name = 3;
+}
+
+message SetBackgroundEvent {
+	string background_name = 1;
+	enum Transition {
+		NONE = 0;
+		FADE_TO_BLACK = 1;
+		CROSSFADE = 2;
+		FADE_TO_WHITE = 3;
+	}
+	Transition transition_type = 2;
+	float transition_time = 3; // in seconds
+}
+
+message SoundPlayEvent {
+	string sound_name = 1;
+	bool loop = 2;
+	uint32 channel = 3;
+}
+
+message SoundStopEvent {
+	uint32 channel = 1;
+	bool fade = 2;
+	float fade_time = 3; // in seconds
+}
+
+message SoundVolumeEvent {
+	uint32 channel = 1;
+	bool smooth = 2;
+}

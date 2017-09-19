@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.aceattorneyonline.master.events;
+
+option java_outer_classname = "SharedEventProtos";
+
+import "uuid.proto";
+
+// Flood controlled
+message GetVersion {
+	Uuid id = 1;
+}
+
+// Flood control handled by SendChat
+message GetMotd {
+}

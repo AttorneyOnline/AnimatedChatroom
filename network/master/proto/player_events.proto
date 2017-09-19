@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package com.aceattorneyonline.master.events;
+
+option java_outer_classname = "PlayerEventProtos";
+
+import "uuid.proto";
+
+// One-shot
+// No name commitment required at this time
+message NewPlayer {
+	Uuid id = 1;
+	string hdid = 2;
+}
+
+// No blanks allowed
+// No differing usernames
+// Flood controlled
+// Spam controlled
+message SendChat {
+	Uuid id = 1;
+	string username = 2;
+	string message = 3;
+}
+
+// Flood controlled
+message GetServerList {
+	Uuid id = 1;
+}
+
+// Flood controlled
+// For legacy AO
+message GetServerListPaged {
+	Uuid id = 1;
+	uint32 page = 2;
+}
+
+// Flood control handled by SendChat
+message GetChatCommandList {
+}
+
+// Flood control handled by SendChat
+message GetChatCommandHelp {
+	string command = 1;
+}
+
+// Flood control handled by SendChat
+message SendPM {
+	Uuid id = 1;
+	string username = 2;
+	string target = 3;
+	string message = 4;
+}
+
+// Flood control handled by SendChat
+message ReplyPM {
+	Uuid id = 1;
+	string message = 2;
+}
+
+// Flood control handled by SendChat
+message ListPlayers {
+}

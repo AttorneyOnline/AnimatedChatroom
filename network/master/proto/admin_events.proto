@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package com.aceattorneyonline.master.events;
+
+option java_outer_classname = "AdminEventProtos";
+
+import "uuid.proto";
+
+message SetMotd {
+	Uuid id = 1;
+	string message = 2;
+}
+
+// Blocking operation
+message ReloadMotd {
+	Uuid id = 1;
+}
+
+// Returns error if already banned
+message BanPlayer {
+	Uuid id = 1;
+	string target = 2;
+	string reason = 3;
+}
+
+// Returns error if not in ban list
+message UnbanPlayer {
+	Uuid id = 1;
+	string target = 2;
+}
+
+// Blocking operation
+message ReloadBans {
+	Uuid id = 1;
+}
