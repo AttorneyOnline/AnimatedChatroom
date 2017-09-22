@@ -2,12 +2,27 @@ syntax = "proto3";
 package ac.events;
 
 message ChatEvent {
-	uint32 player_id = 1; // Optional if you are the sender
-	uint32 emote_id = 2;
+	// Players may occupy multiple characters,
+	// so specify which character is saying the message.
+	uint32 character_id = 1;
+	string emote_id = 2;
 	string message_text = 3;
+	// The timescale should be clamped to reasonable values,
+	// e.g. 0.5~4.0. This modifies the speed at which the
+	// chat message is performed, along with the associated
+	// emote.
+	float timescale = 4;
+	// Depending on the game, horizontal flipping may not be available
+	// as an option to clients; however, it may be controlled
+	// by the server programmatically.
+	bool horizontal_flip = 5;
 }
 
 message LeaveEvent {
+	uint32 character_id = 1;
+}
+
+message DisconnectEvent {
 	enum Cause {
 		UNEXPECTED = 0;
 		DISCONNECT_BY_USER = 1;
