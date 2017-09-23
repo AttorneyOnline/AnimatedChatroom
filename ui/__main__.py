@@ -10,7 +10,7 @@ class MainWindow(QtWidgets.QMainWindow):
 def main():
     app = QtWidgets.QApplication(sys.argv)
     main_window = MainWindow()
-    sys.exit(app.exec_())
+    sys.exit(app.exec_()) # exec is a Python keyword, so exec_ is used
 
 if __name__ == '__main__':
     main()
