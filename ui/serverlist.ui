@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>761</width>
+    <height>417</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Animated Chatroom</string>
+  </property>
+  <widget class="QWidget" name="central_widget">
+   <layout class="QVBoxLayout" name="central_widget_vertical_layout">
+    <item>
+     <widget class="QTabWidget" name="server_list_tab_widget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="list_master_tab_widget">
+       <property name="statusTip">
+        <string/>
+       </property>
+       <attribute name="title">
+        <string>Master</string>
+       </attribute>
+       <attribute name="toolTip">
+        <string>master.example.com:27016 (23 total servers, 46 players)</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="list_master_tab_widget_vertical_layout">
+        <item>
+         <widget class="QTableView" name="list_master_table"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="list_favorites_tab_widget">
+       <attribute name="title">
+        <string>Favorites</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="list_favorites_tab_widget_vertical_layout">
+        <item>
+         <widget class="QTableView" name="list_favorites_table"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menu_bar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>761</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_file">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="menu_file_quit_action"/>
+   </widget>
+   <addaction name="menu_file"/>
+  </widget>
+  <widget class="QStatusBar" name="status_bar"/>
+  <widget class="QDockWidget" name="server_info_widget">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Information</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="server_info_widget_contents">
+    <layout class="QGridLayout" name="server_info_widget_contents_grid_layout">
+     <item row="1" column="0">
+      <widget class="QWidget" name="server_players_widget" native="true">
+       <layout class="QHBoxLayout" name="server_players_widget_horiz_layout">
+        <item>
+         <widget class="QLabel" name="players_label">
+          <property name="text">
+           <string>Players:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLCDNumber" name="players_current_lcd">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>3</number>
+          </property>
+          <property name="segmentStyle">
+           <enum>QLCDNumber::Flat</enum>
+          </property>
+          <property name="intValue" stdset="0">
+           <number>12</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="players_out_of_label">
+          <property name="text">
+           <string>out of</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLCDNumber" name="players_max_lcd">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="digitCount">
+           <number>3</number>
+          </property>
+          <property name="segmentStyle">
+           <enum>QLCDNumber::Flat</enum>
+          </property>
+          <property name="intValue" stdset="0">
+           <number>20</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QTextBrowser" name="server_description_label">
+       <property name="html">
+        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Sans Serif'; font-size:9pt;&quot;&gt;Description in HTML. No shenanigans.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QWidget" name="server_bottom_widget" native="true">
+       <layout class="QHBoxLayout" name="server_bottom_widget_horiz_layout">
+        <property name="spacing">
+         <number>16</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QPushButton" name="connect_button">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Connect</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="view_in_browser_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://example.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;view in browser&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QWidget" name="server_status_widget" native="true">
+       <layout class="QHBoxLayout" name="server_status_widget_horiz_layout">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="server_status_label">
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Status: &lt;span style=&quot;color: green;&quot;&gt;●&lt;/span&gt; online&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="menu_file_quit_action">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

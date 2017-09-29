@@ -6,181 +6,407 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>761</width>
-    <height>417</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Animated Chatroom</string>
+   <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="tab_master">
-       <property name="statusTip">
-        <string/>
-       </property>
-       <attribute name="title">
-        <string>Master</string>
-       </attribute>
-       <attribute name="toolTip">
-        <string>master.example.com:27016 (23 total servers, 46 players)</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QTableView" name="table_master"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab_favorites">
-       <attribute name="title">
-        <string>Favorites</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
-         <widget class="QTableView" name="table_favorites"/>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
+  <widget class="QWidget" name="central_widget"/>
+  <widget class="QMenuBar" name="menu_bar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>761</width>
-     <height>19</height>
+     <width>800</width>
+     <height>24</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menu_file">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionQuit"/>
+    <addaction name="menu_file_open_replay_action"/>
+    <addaction name="menu_file_save_replay_action"/>
+    <addaction name="separator"/>
+    <addaction name="menu_file_disconnect_action"/>
+    <addaction name="menu_file_exit_action"/>
    </widget>
-   <addaction name="menuFile"/>
+   <widget class="QMenu" name="menu_edit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <widget class="QMenu" name="menu_edit_ic_queue">
+     <property name="title">
+      <string>IC queue</string>
+     </property>
+     <addaction name="menu_edit_ic_queue_push_action"/>
+     <addaction name="menu_edit_ic_pop_beginning_action"/>
+     <addaction name="menu_edit_ic_pop_end_action"/>
+    </widget>
+    <widget class="QMenu" name="menu_edit_ooc_queue">
+     <property name="title">
+      <string>OOC queue</string>
+     </property>
+     <addaction name="menu_edit_ooc_queue_push_action"/>
+     <addaction name="menu_edit_ooc_pop_beginning_action"/>
+     <addaction name="menu_edit_ooc_pop_end_action"/>
+    </widget>
+    <addaction name="menu_edit_undo_action"/>
+    <addaction name="menu_edit_redo_action"/>
+    <addaction name="separator"/>
+    <addaction name="menu_edit_cut_action"/>
+    <addaction name="menu_edit_copy_action"/>
+    <addaction name="menu_edit_paste_action"/>
+    <addaction name="separator"/>
+    <addaction name="menu_edit_swap_buffers_action"/>
+    <addaction name="menu_edit_ic_queue"/>
+    <addaction name="menu_edit_ooc_queue"/>
+    <addaction name="separator"/>
+    <addaction name="menu_edit_preferences_action"/>
+   </widget>
+   <widget class="QMenu" name="menu_view">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menu_view_theme">
+     <property name="title">
+      <string>Theme</string>
+     </property>
+     <property name="icon">
+      <iconset theme="preferences-desktop-theme"/>
+     </property>
+     <addaction name="menu_view_theme_default_action"/>
+     <addaction name="separator"/>
+     <addaction name="menu_view_theme_add_action"/>
+    </widget>
+    <addaction name="menu_view_viewport_zoom_in_action"/>
+    <addaction name="menu_view_viewport_zoom_out_action"/>
+    <addaction name="menu_view_viewport_zoom_reset_action"/>
+    <addaction name="separator"/>
+    <addaction name="menu_view_window_on_top_action"/>
+    <addaction name="separator"/>
+    <addaction name="menu_view_theme"/>
+   </widget>
+   <widget class="QMenu" name="menu_server">
+    <property name="title">
+     <string>Server</string>
+    </property>
+    <addaction name="menu_server_info_action"/>
+    <addaction name="separator"/>
+    <addaction name="menu_server_migrate_action"/>
+    <addaction name="menu_server_migrate_code_entry_action"/>
+   </widget>
+   <widget class="QMenu" name="menu_window">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <widget class="QMenu" name="menu_window_layout_action">
+     <property name="title">
+      <string>Layout Windows</string>
+     </property>
+     <addaction name="menu_window_layout_cascade_action"/>
+     <addaction name="menu_window_layout_hsplit_action"/>
+     <addaction name="menu_window_layout_vsplit_action"/>
+     <addaction name="menu_window_layout_grid_action"/>
+    </widget>
+    <addaction name="menu_window_full_screen_action"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="menu_window_layout_action"/>
+   </widget>
+   <widget class="QMenu" name="menu_help">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="menu_help_how_to_play_action"/>
+    <addaction name="menu_help_guide_action"/>
+    <addaction name="separator"/>
+    <addaction name="menu_help_feedback_action"/>
+    <addaction name="separator"/>
+    <addaction name="menu_help_about_action"/>
+   </widget>
+   <addaction name="menu_file"/>
+   <addaction name="menu_edit"/>
+   <addaction name="menu_view"/>
+   <addaction name="menu_server"/>
+   <addaction name="menu_window"/>
+   <addaction name="menu_help"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QDockWidget" name="dockWidget">
-   <property name="floating">
+  <widget class="QStatusBar" name="status_bar"/>
+  <action name="menu_file_open_replay_action">
+   <property name="icon">
+    <iconset theme="document-open"/>
+   </property>
+   <property name="text">
+    <string>Open Replay File…</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+O</string>
+   </property>
+  </action>
+  <action name="menu_file_save_replay_action">
+   <property name="icon">
+    <iconset theme="document-save"/>
+   </property>
+   <property name="text">
+    <string>Save Replay File…</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="menu_file_disconnect_action">
+   <property name="icon">
+    <iconset theme="window-close"/>
+   </property>
+   <property name="text">
+    <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="menu_file_exit_action">
+   <property name="icon">
+    <iconset theme="exit"/>
+   </property>
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string extracomment="Disconnect from all servers and quit the game.">Ctrl+Shift+Q</string>
+   </property>
+  </action>
+  <action name="menu_edit_undo_action">
+   <property name="icon">
+    <iconset theme="undo"/>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="menu_edit_redo_action">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   <property name="icon">
+    <iconset theme="redo"/>
    </property>
-   <property name="windowTitle">
-    <string>Information</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="2" column="0">
-      <widget class="QTextBrowser" name="textBrowser">
-       <property name="html">
-        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Description in HTML. No shenanigans.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QWidget" name="widget" native="true">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Players:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLCDNumber" name="lcdNumber_2">
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="digitCount">
-           <number>3</number>
-          </property>
-          <property name="segmentStyle">
-           <enum>QLCDNumber::Flat</enum>
-          </property>
-          <property name="intValue" stdset="0">
-           <number>12</number>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>out of</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLCDNumber" name="lcdNumber">
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="digitCount">
-           <number>3</number>
-          </property>
-          <property name="segmentStyle">
-           <enum>QLCDNumber::Flat</enum>
-          </property>
-          <property name="intValue" stdset="0">
-           <number>20</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Status: &lt;span style=&quot;color: green;&quot;&gt;●&lt;/span&gt; online&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;http://example.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;view in browser&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <action name="actionQuit">
    <property name="text">
-    <string>Quit</string>
+    <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y, Ctrl+Shift+Z</string>
+   </property>
+  </action>
+  <action name="menu_edit_cut_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="edit-cut"/>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="menu_edit_copy_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="edit-copy"/>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="menu_edit_paste_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="edit-paste"/>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="menu_edit_swap_buffers_action">
+   <property name="text">
+    <string>Swap IC/OOC buffers</string>
+   </property>
+  </action>
+  <action name="menu_edit_ic_queue_push_action">
+   <property name="text">
+    <string>Push to queue</string>
+   </property>
+  </action>
+  <action name="menu_edit_ic_pop_end_action">
+   <property name="text">
+    <string>Pop from end of queue</string>
+   </property>
+  </action>
+  <action name="menu_edit_ic_pop_beginning_action">
+   <property name="text">
+    <string>Pop from beginning of queue</string>
+   </property>
+  </action>
+  <action name="menu_edit_ooc_queue_push_action">
+   <property name="text">
+    <string>Push to queue</string>
+   </property>
+  </action>
+  <action name="menu_edit_ooc_pop_beginning_action">
+   <property name="text">
+    <string>Pop from beginning of queue</string>
+   </property>
+  </action>
+  <action name="menu_edit_ooc_pop_end_action">
+   <property name="text">
+    <string>Pop from end of queue</string>
+   </property>
+  </action>
+  <action name="menu_edit_preferences_action">
+   <property name="text">
+    <string>Preferences…</string>
+   </property>
+  </action>
+  <action name="menu_view_viewport_zoom_in_action">
+   <property name="icon">
+    <iconset theme="zoom-in"/>
+   </property>
+   <property name="text">
+    <string>Zoom Viewport In</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
+   </property>
+  </action>
+  <action name="menu_view_viewport_zoom_out_action">
+   <property name="icon">
+    <iconset theme="zoom-out"/>
+   </property>
+   <property name="text">
+    <string>Zoom Viewport Out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="menu_view_viewport_zoom_reset_action">
+   <property name="icon">
+    <iconset theme="zoom-original"/>
+   </property>
+   <property name="text">
+    <string>Reset Viewport Zoom</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+0</string>
+   </property>
+  </action>
+  <action name="menu_view_window_on_top_action">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Keep Window on Top</string>
+   </property>
+  </action>
+  <action name="menu_view_theme_add_action">
+   <property name="text">
+    <string>Add Theme…</string>
+   </property>
+  </action>
+  <action name="menu_view_theme_default_action">
+   <property name="text">
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="menu_server_info_action">
+   <property name="text">
+    <string>Information…</string>
+   </property>
+  </action>
+  <action name="menu_server_migrate_action">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Migrate to Server…</string>
+   </property>
+  </action>
+  <action name="menu_server_migrate_code_entry_action">
+   <property name="text">
+    <string>Enter Migration Code…</string>
+   </property>
+  </action>
+  <action name="menu_window_full_screen_action">
+   <property name="icon">
+    <iconset theme="view-fullscreen"/>
+   </property>
+   <property name="text">
+    <string>Full Screen</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Return</string>
+   </property>
+  </action>
+  <action name="menu_window_layout_cascade_action">
+   <property name="text">
+    <string>Cascade</string>
+   </property>
+  </action>
+  <action name="menu_window_layout_hsplit_action">
+   <property name="text">
+    <string>Split Horizontally</string>
+   </property>
+  </action>
+  <action name="menu_window_layout_vsplit_action">
+   <property name="text">
+    <string>Split Vertically</string>
+   </property>
+  </action>
+  <action name="menu_window_layout_grid_action">
+   <property name="text">
+    <string>Grid</string>
+   </property>
+  </action>
+  <action name="menu_help_how_to_play_action">
+   <property name="icon">
+    <iconset theme="help"/>
+   </property>
+   <property name="text">
+    <string>How to Play…</string>
+   </property>
+  </action>
+  <action name="menu_help_guide_action">
+   <property name="text">
+    <string>Software Guide…</string>
+   </property>
+  </action>
+  <action name="menu_help_about_action">
+   <property name="icon">
+    <iconset theme="help-about"/>
+   </property>
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="menu_help_feedback_action">
+   <property name="text">
+    <string>Feedback...</string>
    </property>
   </action>
  </widget>
