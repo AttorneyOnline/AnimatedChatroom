@@ -1,5 +1,5 @@
 syntax = "proto3";
-package ac.room;
+package ac;
 
 message JoinRoomRequest {
 	uint32 room_id = 1;

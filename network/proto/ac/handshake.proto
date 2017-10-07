@@ -1,5 +1,5 @@
 syntax = "proto3";
-package ac.handshake;
+package ac;
 
 // Join process:
 // 1. Client: BASIC or FULL ServerInfoRequest

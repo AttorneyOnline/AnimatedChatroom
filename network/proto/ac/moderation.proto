@@ -1,5 +1,5 @@
 syntax = "proto3";
-package ac.moderation;
+package ac;
 
 message KickPlayer {
 	uint32 player_id = 1;
@@ -36,7 +36,7 @@ message SetServerInfo {
 }
 
 
-import "room.proto";
+import "ac/room.proto";
 
 // Freeze a room so that only moderators may talk.
 message FreezeRoom {
@@ -47,7 +47,7 @@ message FreezeRoom {
 // Creates a new room or updates an existing one.
 message CreateRoom {
 	uint32 room_id = 1;
-	room.Room room = 2;
+	Room room = 2;
 }
 
 message DeleteRoom {

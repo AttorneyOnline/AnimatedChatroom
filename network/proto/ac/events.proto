@@ -1,5 +1,5 @@
 syntax = "proto3";
-package ac.events;
+package ac;
 
 message ChatEvent {
 	// Players may occupy multiple characters,
