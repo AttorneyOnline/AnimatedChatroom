@@ -1,24 +1,8 @@
 import sys
-from PyQt5 import QtWidgets, uic
 
+from PyQt5 import QtWidgets
 
-class MainWindow(QtWidgets.QMainWindow): 
-    def __init__(self):
-        super(MainWindow, self).__init__()
-        uic.loadUi("main.ui", self)
-        self.show()
-
-    def open_about(self):
-        QtWidgets.QMessageBox.about(self, "Animated Chatroom", "Hi")
-
-    def open_feedback(self):
-        pass
-
-    def open_guide(self):
-        pass
-
-    def open_howto(self):
-        pass
+from ui.main import MainWindow
 
 
 def main():
