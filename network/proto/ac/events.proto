@@ -1,25 +1,25 @@
-syntax = "proto3";
+syntax = "proto2";
 package ac;
 
 message ChatEvent {
 	// Players may occupy multiple characters,
 	// so specify which character is saying the message.
-	uint32 character_id = 1;
-	string emote_id = 2;
-	string message_text = 3;
+	required uint32 character_id = 1;
+	required string emote_id = 2;
+	required string message_text = 3;
 	// The timescale should be clamped to reasonable values,
 	// e.g. 0.5~4.0. This modifies the speed at which the
 	// chat message is performed, along with the associated
 	// emote.
-	float timescale = 4;
+	optional float timescale = 4;
 	// Depending on the game, horizontal flipping may not be available
 	// as an option to clients; however, it may be controlled
 	// by the server programmatically.
-	bool horizontal_flip = 5;
+	optional bool horizontal_flip = 5;
 }
 
 message LeaveEvent {
-	uint32 character_id = 1;
+	required uint32 character_id = 1;
 }
 
 message DisconnectEvent {
@@ -29,41 +29,41 @@ message DisconnectEvent {
 		KICKED = 2;
 		BANNED = 3;
 	}
-	uint32 player_id = 1;
-	string leave_message = 2;
+	required uint32 player_id = 1;
+	optional string leave_message = 2;
 }
 
 message JoinEvent {
-	uint32 player_id = 1;
-	string player_name = 2;
-	string character_name = 3;
+	required uint32 player_id = 1;
+	required string player_name = 2;
+	required string character_name = 3;
 }
 
 message SetBackgroundEvent {
-	string background_name = 1;
+	required string background_name = 1;
 	enum Transition {
 		NONE = 0;
 		FADE_TO_BLACK = 1;
 		CROSSFADE = 2;
 		FADE_TO_WHITE = 3;
 	}
-	Transition transition_type = 2;
-	float transition_time = 3; // in seconds
+	required Transition transition_type = 2;
+	optional float transition_time = 3; // in seconds
 }
 
 message SoundPlayEvent {
-	string sound_name = 1;
-	bool loop = 2;
-	uint32 channel = 3;
+	required string sound_name = 1;
+	required bool loop = 2;
+	required uint32 channel = 3;
 }
 
 message SoundStopEvent {
-	uint32 channel = 1;
-	bool fade = 2;
-	float fade_time = 3; // in seconds
+	required uint32 channel = 1;
+	required bool fade = 2;
+	optional float fade_time = 3; // in seconds
 }
 
 message SoundVolumeEvent {
-	uint32 channel = 1;
-	bool smooth = 2;
+	required uint32 channel = 1;
+	required bool smooth = 2;
 }

@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 package ac;
 
 // Join process:
@@ -16,7 +16,7 @@ message ServerInfoRequest {
 		// Server responds with ExtendedServerInfoResponse.
 		FULL = 2;
 	}
-	Verbosity verbosity = 1;
+	required Verbosity verbosity = 1;
 }
 
 enum Protection {
@@ -34,35 +34,35 @@ enum Protection {
 }
 
 message ServerInfoResponse {
-	string name = 1;
-	string address = 2;
-	uint32 port = 3;
-	uint32 players = 4;
-	uint32 players_max = 5;
-	Protection protection = 6;
+	required string name = 1;
+	required string address = 2;
+	required uint32 port = 3;
+	required uint32 players = 4;
+	required uint32 players_max = 5;
+	required Protection protection = 6;
 	// Required.
-	bytes auth_challenge = 7;
+	required bytes auth_challenge = 7;
 }
 
 message ExtendedServerInfoResponse {
-	ServerInfoResponse header = 1;
-	string description = 2;
+	required ServerInfoResponse header = 1;
+	required string description = 2;
 	repeated ServerInfoPlayer player_list = 3;
 }
 
 message ServerInfoPlayer {
-	string name = 1;
-	string character_name = 2;
-	uint32 join_time = 3;
+	required string name = 1;
+	required string character_name = 2;
+	required uint32 join_time = 3;
 }
 
 message JoinRequest {
-	string player_name = 1;
+	required string player_name = 1;
 	// This response is required!
 	// OPEN: bcrypt(auth_challenge + GAME_ID) (prevents replay attacks)
 	// JOIN_WITH_PASSWORD: bcrypt(auth_challenge + GAME_ID + password)
-	bytes auth_response = 2;
-	string player_id = 3;
+	required bytes auth_response = 2;
+	required string player_id = 3;
 }
 
 message JoinResponse {
@@ -72,6 +72,6 @@ message JoinResponse {
 		BAD_PASSWORD = 2;
 		INVALID_REQUEST = 3;
 	}
-	Result result = 1;
-	string info = 2;
+	required Result result = 1;
+	optional string info = 2;
 }

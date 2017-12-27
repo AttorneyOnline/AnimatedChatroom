@@ -14,11 +14,19 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
-    <widget class="QGraphicsView" name="graphicsView"/>
+   <item row="0" column="0">
+    <widget class="QPygletWidget" name="widget" native="true"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QPygletWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">qpygletwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

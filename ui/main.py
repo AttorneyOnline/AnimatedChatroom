@@ -17,7 +17,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def load_widgets(self):
         # self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.viewport)
         self.setCentralWidget(self.viewport)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, SoundMixer(self))
+        # self.addDockWidget(QtCore.Qt.RightDockWidgetArea, SoundMixer(self))
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, OOCChat(self))
 
     def open_about(self):

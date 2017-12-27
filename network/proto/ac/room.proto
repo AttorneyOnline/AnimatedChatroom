@@ -1,10 +1,10 @@
-syntax = "proto3";
+syntax = "proto2";
 package ac;
 
 message JoinRoomRequest {
-	uint32 room_id = 1;
-	uint32 character_id = 2;
-	string password = 3;
+	required uint32 room_id = 1;
+	required uint32 character_id = 2;
+	optional string password = 3;
 }
 
 message JoinRoomResponse {
@@ -16,7 +16,7 @@ message JoinRoomResponse {
 	}
 	// Response room_id may not be the original room_id
 	// e.g. if redirect occurs
-	uint32 room_id = 1;
+	optional uint32 room_id = 1;
 }
 
 message RoomListRequest {
@@ -28,14 +28,14 @@ message RoomListResponse {
 }
 
 message Room {
-	uint32 room_id = 1;
-	string name = 2;
-	string description = 3;
+	required uint32 room_id = 1;
+	required string name = 2;
+	optional string description = 3;
 	// May be # of unique players or the # of characters taken
 	// (I suggest the former)
-	uint32 players = 4;
-	uint32 players_max = 5;
+	required uint32 players = 4;
+	optional uint32 players_max = 5;
 	// Whether or not usernames are hidden within rooms
 	// (i.e. you don't know who is who)
-	bool hidden_names = 6;
+	optional bool hidden_names = 6;
 }

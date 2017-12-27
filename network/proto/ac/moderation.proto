@@ -1,10 +1,10 @@
-syntax = "proto3";
+syntax = "proto2";
 package ac;
 
 message KickPlayer {
-	uint32 player_id = 1;
-	string reason = 2;
-	bool stealth = 3;
+	required uint32 player_id = 1;
+	required string reason = 2;
+	required bool stealth = 3;
 	// Kick a player from a specific room
 	// or from the whole server.
 	oneof scope {
@@ -14,25 +14,25 @@ message KickPlayer {
 }
 
 message BanPlayer {
-	uint32 player_id = 1;
+	required uint32 player_id = 1;
 	// I chose to specify duration instead of unban time
 	// due to timezone problems.
-	uint64 duration = 2; // in seconds
-	string reason = 3;
-	bool stealth = 4;
+	required uint64 duration = 2; // in seconds
+	required string reason = 3;
+	optional bool stealth = 4;
 }
 
 message UnbanPlayer {
-	string identifier = 1;
+	required string identifier = 1;
 }
 
 message MutePlayer {
-	uint32 player_id = 1;
-	bool muted = 2;
+	required uint32 player_id = 1;
+	required bool muted = 2;
 }
 
 message SetServerInfo {
-	string description = 1;
+	required string description = 1;
 }
 
 
@@ -40,16 +40,16 @@ import "ac/room.proto";
 
 // Freeze a room so that only moderators may talk.
 message FreezeRoom {
-	uint32 room_id = 1;
-	bool frozen = 2;
+	required uint32 room_id = 1;
+	required bool frozen = 2;
 }
 
 // Creates a new room or updates an existing one.
 message CreateRoom {
-	uint32 room_id = 1;
-	Room room = 2;
+	required uint32 room_id = 1;
+	required Room room = 2;
 }
 
 message DeleteRoom {
-	uint32 room_id = 1;
+	required uint32 room_id = 1;
 }
