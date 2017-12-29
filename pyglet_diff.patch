@@ -1,0 +1,96 @@
+diff -r 1c9bf932f29e pyglet/media/sources/ffmpeg.py
+--- a/pyglet/media/sources/ffmpeg.py	Thu Dec 07 21:29:59 2017 +0100
++++ b/pyglet/media/sources/ffmpeg.py	Thu Dec 28 23:22:24 2017 -0600
+@@ -258,6 +258,11 @@
+         avcodec.avcodec_free_context(byref(codec_context))
+         raise FFmpegException('Could not copy the AVCodecContext.')
+     codec = avcodec.avcodec_find_decoder(codec_context.contents.codec_id)
++    if codec_context.contents.codec_id == 140: # AV_CODEC_ID_VP8
++        print("doing it")
++        codec = avcodec.avcodec_find_decoder_by_name(asbytes('libvpx'))
++        print(avcodec.avcodec_pix_fmt_to_codec_tag(35))
++        print(codec_context.contents.pix_fmt)
+     if not codec:
+         raise FFmpegException('No codec found for this media.')
+     result = avcodec.avcodec_open2(codec_context, codec, None)
+@@ -651,6 +656,7 @@
+             if _debug:
+                 print('Created and queued packet %d (%f)' % \
+                     (video_packet.id, video_packet.timestamp))
++            #avutil.pix_fmt_desc_get(self._video_stream.contents.codec_
+ 
+             self._append_video_packet(video_packet)
+             return video_packet
+@@ -811,7 +817,7 @@
+         except FFmpegException:
+             image_data = None
+         else:
+-            image_data = image.ImageData(width, height, 'RGB', buffer, pitch)
++            image_data = image.ImageData(width, height, 'RGBA', buffer, pitch)
+             timestamp = ffmpeg_get_frame_ts(self._video_stream)            
+             timestamp = timestamp_from_ffmpeg(timestamp)
+             video_packet.timestamp = timestamp - self.start_time
+@@ -847,14 +853,20 @@
+             raise FFmpegException('Error decoding a video packet.')
+         if not got_picture:
+             raise FFmpegException('No frame could be decompressed')
+-        
+-        avcodec.avpicture_fill(byref(picture_rgb), data_out, AV_PIX_FMT_RGB24,
++
++        AV_PIX_FMT_ARGB = 27
++        AV_PIX_FMT_RGBA = 28
++        AV_PIX_FMT_ABGR = 29
++        AV_PIX_FMT_BGRA = 30
++        AV_PIX_FMT_YUVA420P = 35
++        print(stream.codec_context.contents.pix_fmt)
++        avcodec.avpicture_fill(byref(picture_rgb), data_out, stream.codec_context.contents.pix_fmt,
+             width, height)
+-        
++
+         self.img_convert_ctx = swscale.sws_getCachedContext(
+             self.img_convert_ctx,
+             width, height, stream.codec_context.contents.pix_fmt,
+-            width, height, AV_PIX_FMT_RGB24, 
++            width, height, AV_PIX_FMT_RGBA,
+             SWS_FAST_BILINEAR, None, None, None)
+ 
+         swscale.sws_scale(self.img_convert_ctx, 
+@@ -905,6 +917,7 @@
+ 
+         if _debug:
+             print('Returning', video_packet)
++            video_packet.image.texture.save(filename="R:/a.png")
+ 
+         return video_packet.image
+ 
+diff -r 1c9bf932f29e pyglet/media/sources/ffmpeg_lib/libavcodec.py
+--- a/pyglet/media/sources/ffmpeg_lib/libavcodec.py	Thu Dec 07 21:29:59 2017 +0100
++++ b/pyglet/media/sources/ffmpeg_lib/libavcodec.py	Thu Dec 28 23:22:24 2017 -0600
+@@ -105,7 +105,7 @@
+     _fields_ = [
+         ('name', c_char_p),
+         ('long_name', c_char_p),
+-        # And more...
++        ('pix_fmts', POINTER(c_int))
+     ]
+ class AVCodecContext(Structure): pass
+ class RcOverride(Structure): pass
+@@ -324,6 +324,7 @@
+ avcodec.av_packet_move_ref.argtypes = [POINTER(AVPacket), POINTER(AVPacket)]
+ avcodec.avcodec_find_decoder.restype = POINTER(AVCodec)
+ avcodec.avcodec_find_decoder.argtypes = [c_int]
++avcodec.avcodec_find_decoder_by_name.restype = POINTER(AVCodec)
+ AVDictionary = libavutil.AVDictionary
+ avcodec.avcodec_open2.restype = c_int
+ avcodec.avcodec_open2.argtypes = [POINTER(AVCodecContext),
+diff -r 1c9bf932f29e pyglet/media/sources/ffmpeg_lib/libavutil.py
+--- a/pyglet/media/sources/ffmpeg_lib/libavutil.py	Thu Dec 07 21:29:59 2017 +0100
++++ b/pyglet/media/sources/ffmpeg_lib/libavutil.py	Thu Dec 28 23:22:24 2017 -0600
+@@ -68,6 +68,7 @@
+ AV_NUM_DATA_POINTERS = 8
+ 
+ AV_PIX_FMT_RGB24 = 2
++AV_PIX_FMT_RGBA = 32
+ 
+ class AVBufferRef(Structure): pass
+ 

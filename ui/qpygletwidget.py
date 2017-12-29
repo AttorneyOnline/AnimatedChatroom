@@ -12,7 +12,7 @@ import pyglet
 pyglet.options['shadow_window'] = False
 pyglet.options['debug_gl'] = False
 from pyglet import gl
-from PyQt5 import QtCore, QtGui, QtOpenGL
+from PyQt5 import QtCore, QtGui, QtOpenGL, QtWidgets
 
 
 class ObjectSpace(object):
@@ -176,7 +176,7 @@ class QPygletWidget(QtOpenGL.QGLWidget):
 
 class MyPygletWidget(QPygletWidget):
     def on_init(self):
-        self.sprite = pyglet.sprite.Sprite(pyglet.resource.image("logo.png"))
+        self.sprite = pyglet.sprite.Sprite(pyglet.media.load("R:/pivot.avi").get_animation())
         self.label = pyglet.text.Label(
             text="This is a pyglet label rendered in a Qt widget :)")
         self.setMinimumSize(QtCore.QSize(640, 480))
@@ -187,12 +187,16 @@ class MyPygletWidget(QPygletWidget):
 
 
 def main():
-    app = QtGui.QApplication(sys.argv)
-    window = QtGui.QMainWindow()
+    app = QtWidgets.QApplication(sys.argv)
+    window = QtWidgets.QMainWindow()
     widget = MyPygletWidget()
+    app.setActiveWindow(window)
     window.setCentralWidget(widget)
     window.show()
-    app.exec_()
+    try:
+        exit(app.exec_())
+    except:
+        print("Exiting due to error!")
 
 if __name__ == "__main__":
     main()
