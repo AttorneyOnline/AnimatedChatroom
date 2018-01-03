@@ -3,6 +3,7 @@ import sys
 from PyQt5 import QtWidgets
 
 from ui.main import MainWindow
+from ui.lobby import Lobby
 
 import sys
 
@@ -27,7 +28,8 @@ sys.excepthook = my_exception_hook
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-    main_window = MainWindow()
+    #main_window = MainWindow()
+    lobby = Lobby()
     sys.exit(app.exec_())  # exec is a Python keyword, so exec_ is used
 
 

@@ -7,7 +7,7 @@ from ui.ooc import OOCChat
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-        uic.loadUi("main.ui", self)
+        uic.loadUi("ui/main.ui", self)
 
         self.viewport = Viewport(self)
 

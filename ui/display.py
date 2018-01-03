@@ -4,12 +4,15 @@ pyglet.options['debug_lib'] = True
 from PyQt5.QtCore import QSize
 from ui.qpygletwidget import QPygletWidget
 from pyglet import gl
+import core.asset
+from core.scene import Scene
+import core.pylget_loader
 
 
 class Display(QPygletWidget):
 
     def on_init(self):
-        res = pyglet.media.load("R:/adachi.webm")
+        #res = pyglet.media.load("R:/adachi.webm")
         #animation = pyglet.image.load_animation("adachi.gif")
         #animation = res.get_animation()
         #bin = pyglet.image.atlas.TextureBin()
@@ -18,11 +21,18 @@ class Display(QPygletWidget):
         #self.sprite.base_width = self.sprite.width
         #self.sprite.base_height = self.sprite.height
 
-        self.player = pyglet.media.Player()
-        self.player.queue(res)
+        #self.player = pyglet.media.Player()
+        #self.player.queue(res)
         #self.player.on_player_next_source = lambda: self.player.queue(res)
-        self.player.loop = True
-        self.player.play()
+        #self.player.loop = True
+        #self.player.play()
+        char = core.asset.Character('123456')
+        char.load()
+        self.scene = Scene()
+        char._open_tars()
+        print(char.content_tars)
+        self.scene.layers['background'] = core.pylget_loader.load_animation(char.emotes[0].idle, char.content_tars[char.files[char.emotes[0].idle.filename]])
+        char._close_tars()
 
         self.label = pyglet.text.Label(
             text="This is a pyglet label rendered in a Qt widget :)",
@@ -37,7 +47,8 @@ class Display(QPygletWidget):
     def on_draw(self):
         pyglet.app.event_loop.idle()
         self.label.draw()
-        self.player.texture.blit(0, 0, width=self.base_width, height=self.base_height)
+        self.scene.draw()
+        #self.player.texture.blit(0, 0, width=self.base_width, height=self.base_height)
         #self.sprite.draw()
 
     def on_resize(self, w, h):

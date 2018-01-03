@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>Lobby</class>
+ <widget class="QMainWindow" name="Lobby">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -9,6 +9,9 @@
     <width>761</width>
     <height>417</height>
    </rect>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
   </property>
   <property name="windowTitle">
    <string>Animated Chatroom</string>
@@ -33,6 +36,11 @@
        <property name="statusTip">
         <string/>
        </property>
+       <attribute name="icon">
+        <iconset>
+         <normalon>../res/icons/ic_language_black_24px.svg</normalon>
+        </iconset>
+       </attribute>
        <attribute name="title">
         <string>Master</string>
        </attribute>
@@ -41,17 +49,89 @@
        </attribute>
        <layout class="QVBoxLayout" name="list_master_tab_widget_vertical_layout">
         <item>
-         <widget class="QTableView" name="list_master_table"/>
+         <widget class="QListView" name="list_master_servers"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="list_master_tab_buttons">
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="button_master_refresh">
+            <property name="text">
+             <string>Refresh</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="list_favorites_tab_widget">
+       <attribute name="icon">
+        <iconset>
+         <normalon>../res/icons/ic_star_black_24px.svg</normalon>
+        </iconset>
+       </attribute>
        <attribute name="title">
         <string>Favorites</string>
        </attribute>
-       <layout class="QVBoxLayout" name="list_favorites_tab_widget_vertical_layout">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QTableView" name="list_favorites_table"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="list_favorites_tab_buttons">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>130</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="button_direct_connect">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Direct connect…</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="button_add_favorite">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Add favorite…</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -76,7 +156,6 @@
    </widget>
    <addaction name="menu_file"/>
   </widget>
-  <widget class="QStatusBar" name="status_bar"/>
   <widget class="QDockWidget" name="server_info_widget">
    <property name="floating">
     <bool>false</bool>
@@ -243,5 +322,62 @@ p, li { white-space: pre-wrap; }
   </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>button_master_refresh</sender>
+   <signal>clicked()</signal>
+   <receiver>Lobby</receiver>
+   <slot>master_server_refresh()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>425</x>
+     <y>362</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>380</x>
+     <y>208</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>button_add_favorite</sender>
+   <signal>clicked()</signal>
+   <receiver>Lobby</receiver>
+   <slot>server_add_to_favorites()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>376</x>
+     <y>362</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>380</x>
+     <y>208</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>button_direct_connect</sender>
+   <signal>clicked()</signal>
+   <receiver>Lobby</receiver>
+   <slot>open_direct_connect_dialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>241</x>
+     <y>382</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>380</x>
+     <y>208</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>master_refresh()</slot>
+  <slot>server_connect()</slot>
+  <slot>server_get_info()</slot>
+  <slot>open_direct_connect_dialog()</slot>
+  <slot>server_view_in_browser()</slot>
+  <slot>server_add_to_favorites()</slot>
+ </slots>
 </ui>
