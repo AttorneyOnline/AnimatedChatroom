@@ -26,9 +26,31 @@ class ServerInfoRequest(Packet):
 
 
 class ServerInfoResponse(Packet):
+    class Protection:
+        OPEN = 0
+        JOIN_WITH_PASSWORD = 1
+        SPECTATE_ONLY = 2
+        WHITELIST = 3
+        CLOSED = 4
+
+    class Details:
+        def __init__(self, auth_challenge: bytes, desc: str, players: list):
+            self.auth_challenge = auth_challenge
+            self.desc = desc
+            self.players = players
+
     msgid = 'ServerInfoResponse'
-    # TODO
-    pass
+
+    def __init__(self, name: str, address: str, port: int, version: str, player_count: int,
+                 max_players: int, protection: int, details: Details):
+        self.name = name
+        self.address = address
+        self.port = port
+        self.version = version
+        self.player_count = player_count
+        self.max_players = max_players
+        self.protection = protection
+        self.details = details
 
 
 class JoinRequest(Packet):
