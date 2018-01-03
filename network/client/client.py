@@ -7,13 +7,15 @@ from network import packets
 
 class Client:
 
-    def __init__(self, address, port='42505'):
+    def __init__(self, loader, address, port='42505'):
         self.address = address
         self.port = port
+        self.loader = loader
         loop = asyncio.get_event_loop()
         self.transport = loop.create_connection(lambda: ClientProtocol(self), address, port)
-        loop.run_until_complete(self.transport)
-
+        self.loader.status = "Connecting to client..."
+        self.loader.progress = 0
+        #loop.run_until_complete(self.transport)
 
 class ClientProtocol(asyncio.Protocol):
 
@@ -48,6 +50,8 @@ class ClientProtocol(asyncio.Protocol):
                 print("Unknown packet!")
 
     def handle_server_info_response(self, packet: dict):
+        self.client.loader.status = "Joining server..."
+        self.client.loader.progress = 20
         self.challenge = packet['auth_challenge']
         sha256 = hashlib.sha256()
         sha256.update("abcd".encode("utf-8"))
@@ -58,6 +62,9 @@ class ClientProtocol(asyncio.Protocol):
         #self.transport.write(packets.AssetListRequest().encode())
 
     def handle_join_response(self, packet: dict):
+        self.client.loader.status = "Complete"
+        self.client.loader.progress = 100
+        self.client.loader.done()
         pass
 
     def join_room(self, room_no: int):

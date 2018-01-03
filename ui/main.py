@@ -2,11 +2,12 @@ from PyQt5 import QtCore, QtWidgets, uic
 from ui.viewport import Viewport
 from ui.sound_mixer import SoundMixer
 from ui.ooc import OOCChat
+from network.client.client import Client
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
+    def __init__(self, client: Client, parent=None):
+        super().__init__(parent)
         uic.loadUi("ui/main.ui", self)
 
         self.viewport = Viewport(self)

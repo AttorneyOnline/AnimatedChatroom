@@ -1,5 +1,9 @@
 from PyQt5 import QtCore, QtWidgets, uic
 
+from network.client.client import Client
+from ui.main import MainWindow
+
+
 class Lobby(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -35,13 +39,38 @@ class Lobby(QtWidgets.QMainWindow):
                 self.open_direct_connect_dialog()
 
     def _start_connect(self, hostname, port):
-        Loading(self).exec_()
+        loading = Loading(self)
+        client = Client(loading, hostname, port=port)
+        loading.exec_()
+        self.main = MainWindow(client, self)
+        self.hide()
+        self.main.show()
 
 class Loading(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._status = None
+        self._progress = None
         uic.loadUi("ui/loading.ui", self)
+        self.widget_subdownload.hide()
         self.show()
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, val: str):
+        self.label_status: QtWidgets.QLabel
+        self.label_status.setText(val)
+
+    @property
+    def progress(self):
+        return self._progress
+
+    @progress.setter
+    def progress(self, val: int):
+        self.progress_loading.setValue(val)
 
     def cancel(self):
         self.close()
