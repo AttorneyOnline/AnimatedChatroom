@@ -63,7 +63,7 @@ class JoinRequest(Packet):
 
 
 class JoinResponse(Packet):
-    class JoinResult(Enum):
+    class JoinResult:
         SUCCESS = 0
         SERVER_FULL = 1
         BAD_PASSWORD = 2

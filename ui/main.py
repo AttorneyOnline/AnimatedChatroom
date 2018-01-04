@@ -10,6 +10,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__(parent)
         uic.loadUi("ui/main.ui", self)
 
+        self._client = client
         self.viewport = Viewport(self)
 
         self.load_widgets()
@@ -20,6 +21,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.viewport)
         # self.addDockWidget(QtCore.Qt.RightDockWidgetArea, SoundMixer(self))
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, OOCChat(self))
+
+    def closeEvent(self, event):
+        self._client.close()
 
     def open_about(self):
         QtWidgets.QMessageBox.about(self, "Animated Chatroom", "Hi")
