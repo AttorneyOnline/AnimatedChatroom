@@ -100,7 +100,7 @@ class JoinRoomRequest(Packet):
 
 
 class JoinRoomResponse(Packet):
-    class JoinRoomResult(Enum):
+    class JoinRoomResult:
         SUCCESS = 0
         ROOM_FULL = 1
         BAD_PASSWORD = 2
@@ -152,7 +152,7 @@ class Leave(Packet):
 
 
 class Disconnect(Packet):
-    class DisconnectCause(Enum):
+    class DisconnectCause:
         UNSPECIFIED = 0
         DISCONNECT_BY_USER = 1
         KICKED = 2
@@ -168,7 +168,7 @@ class Disconnect(Packet):
 
 class SetBackground(Packet):
     class Transition:
-        class TransitionType(Enum):
+        class TransitionType:
             NONE = 0
             FADE_TO_BLACK = 1
             CROSSFADE = 2

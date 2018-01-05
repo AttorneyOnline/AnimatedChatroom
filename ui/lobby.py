@@ -1,10 +1,11 @@
-from PyQt5 import QtCore, QtWidgets, uic
+import asyncio
+import traceback
 
+from PyQt5 import QtCore, QtWidgets, uic, QtGui
+
+from network import packets
 from network.client.client import Client, ClientHandler
 from ui.main import MainWindow
-
-import asyncio
-from network import packets
 
 
 class Lobby(QtWidgets.QMainWindow):
@@ -97,13 +98,23 @@ class ClientThread(QtCore.QThread):
         asyncio.set_event_loop(self.loop)
         self._disconnect_future = self.loop.create_future()
         self.loop.run_until_complete(self.connect())
-        self.loop.run_until_complete(self._disconnect_future)
+        try:
+            self.loop.run_until_complete(self._disconnect_future)
+        except asyncio.CancelledError:
+            pass
         print("Client thread closed.")
 
     async def connect(self):
         self.set_status.emit("Connecting to server...")
         self.set_progress.emit(0)
-        await self._client.connect(self._disconnect_future)
+        try:
+            await self._client.connect(self._disconnect_future)
+        #except TimeoutError:
+        #    self.error.emit("The connection to the server timed out.")
+        #    return
+        except OSError as e:
+            self.on_exception.emit(e)
+            return
 
         self.set_status.emit("Getting server info...")
         self.set_progress.emit(20)
@@ -177,9 +188,18 @@ class Loading(QtWidgets.QDialog):
         self.deleteLater()
 
     def on_exception(self, exc: Exception):
-        print(exc)
-        msgbox = QtWidgets.QMessageBox()
-        msgbox.critical(self, "Connection Error", "Failed to connect to server.", QtWidgets.QMessageBox.Ok)
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setDetailedText(traceback.format_exc())
+        mono_font_name = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.FixedFont).family()
+        msgbox.setStyleSheet(
+            f'QTextEdit {{ background-color: #272822; color: #fff; font-family: {mono_font_name}; min-width: 400px; }}')
+        msgbox.setWindowTitle("Connection Error")
+        msgbox.setText("Failed to connect to server.")
+        msgbox.setWindowModality(QtCore.Qt.WindowModal)
+        msgbox.setIcon(QtWidgets.QMessageBox.Critical)
+        msgbox.adjustSize()
+        msgbox.exec_()
+        self.on_disconnect()
 
     def on_disconnect(self):
         # This assumes that the disconnect was either graceful or there was an exception

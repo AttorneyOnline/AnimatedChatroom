@@ -21,9 +21,10 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             rooms = Rooms(client, parent=self)
             rooms.setWindowModality(QtCore.Qt.WindowModal)
-            rooms.show()
+            result = rooms.exec_()
+            if result != QtWidgets.QDialog.Accepted:
+                self.close()
         except Exception as e:
-            print(str(e))
             msgbox = QtWidgets.QMessageBox()
             msgbox.critical(self, "Rooms Error", "There was an error retrieving the room list.",
                             QtWidgets.QMessageBox.Ok)

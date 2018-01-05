@@ -37,18 +37,34 @@ class Client:
     def __init__(self, address, port='42505'):
         self.address = address
         self.port = port
+
+        # A general handler. Useful for handling messages that we did not expect.
         self.handler = None
+
+        # Populated only after a connection has been established.
         self._transport = None
         self._protocol = None
+
+        # Populated only when a server info request is made.
         self.server_info = None
+
+        # This challenge/nonce is reused across the entire session.
         self.challenge = None
         self.rooms = None
 
-    async def connect(self, disconnect_future: asyncio.Future):
-        loop = asyncio.get_event_loop()
-        self._transport, self._protocol = \
-            await loop.create_connection(lambda: ClientProtocol(self, disconnect_future),
-                                         self.address, self.port)
+        # loop hooks on once the connection is established. The client may be instantiated
+        # on one thread but then the connect may be called on another one.
+        self.loop = None
+
+    async def connect(self, disconnect_future: asyncio.Future = None):
+        self.loop = asyncio.get_event_loop()
+        try:
+            self._transport, self._protocol = \
+                await self.loop.create_connection(lambda: ClientProtocol(self, disconnect_future),
+                                             self.address, self.port)
+        except OSError:
+            disconnect_future.cancel()
+            raise
 
     def handle_message(self, packet: dict):
         try:
@@ -112,6 +128,9 @@ class Client:
             raise ConnectionError("The join result was not understood: {}".format(result['result_code']))
 
     async def get_rooms(self):
+        """
+        Doesn't exist.
+        """
         future = asyncio.Future()
         self.send_request(future, packets.RoomListRequest(), packets.RoomListResponse)
         return await future
@@ -151,7 +170,7 @@ class ClientProtocol(asyncio.Protocol):
                      message: packets.Packet, expected_response: Type[packets.Packet]):
         self.write(message)
         if expected_response.msgid not in self._futures:
-            self._futures[expected_response.msgid] = list()
+            self._futures[expected_response.msgid] = []
         self._futures[expected_response.msgid].append(future)
 
     def connection_made(self, transport: asyncio.Transport):
@@ -208,10 +227,10 @@ if __name__ == '__main__':
     client.handler = handler
     async def test():
         await client.connect()
-        await client.get_server_info()
+        info = await client.get_server_info()
         await client.join_server("longboi", "abcd")
-        rooms = await client.get_rooms()
-        print(rooms)
+        print(info['rooms'])
+        await client.join_room(1, "abcd")
         client.close()
     test_task = loop.create_task(test())
     loop.run_until_complete(test_task)
