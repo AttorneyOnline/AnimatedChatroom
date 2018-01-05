@@ -6,6 +6,8 @@ import msgpack
 
 
 class Packet:
+    msgid = None
+
     def encode(self):
         """Encode the message using msgpack."""
         print("writing:", self.__dict__)
@@ -67,6 +69,8 @@ class JoinResponse(Packet):
         SUCCESS = 0
         SERVER_FULL = 1
         BAD_PASSWORD = 2
+        BANNED = 3
+        OTHER = 4
 
     msgid = 'JoinResponse'
 
@@ -78,6 +82,12 @@ class JoinResponse(Packet):
 
 class RoomListRequest(Packet):
     msgid = 'RoomListRequest'
+
+    def __init__(self):
+        self.id = self.msgid
+
+class RoomListResponse(Packet):
+    msgid = 'RoomListResponse'
 
 
 class JoinRoomRequest(Packet):

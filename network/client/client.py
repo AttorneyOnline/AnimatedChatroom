@@ -1,5 +1,6 @@
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from typing import Type
 
 import msgpack
 import struct
@@ -11,19 +12,15 @@ class ClientHandler:
 
     def __init__(self, client):
         self.client = client
-        self.handler_table = {
-            packets.ServerInfoResponse.msgid: self.handle_server_info_response,
-            packets.JoinResponse.msgid:       self.handle_join_response,
-            packets.Goodbye.msgid:            self.handle_goodbye_packet,
-            packets.AssetListResponse.msgid:  self.handle_asset_list_response,
-            packets.JoinRoomResponse.msgid:   self.handle_join_room_response
-        }
 
     def respond(self, msg: packets.Packet):
         self.client.write(msg)
 
     def handle_message(self, msg):
-        self.handler_table[msg['id']](msg)
+        try:
+            getattr(self, msg['id'])(msg)
+        except AttributeError:
+            pass
 
     def handle_connect(self):
         pass
@@ -34,20 +31,8 @@ class ClientHandler:
     def handle_exception(self, exc: Exception):
         pass
 
-    def handle_server_info_response(self, packet: dict):
-        pass
-
-    def handle_join_response(self, packet: dict):
-        pass
-
-    def handle_asset_list_response(self, packet: dict):
-        pass
-
-    def handle_goodbye_packet(self, packet: dict):
+    def handle_Goodbye(self, packet: dict):
         print("disconnect")
-
-    def handle_join_room_response(self, packet: dict):
-        pass
 
 
 class Client:
@@ -57,15 +42,18 @@ class Client:
         self.port = port
         self.handler = None
         self._transport = None
+        self._protocol = None
         self.challenge = None
+        self.rooms = None
 
-    def connect(self):
+    async def connect(self):
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(self._connect())
+        self._transport, self._protocol = \
+            await loop.create_connection(lambda: ClientProtocol(self), self.address, self.port)
 
-    async def _connect(self):
-        loop = asyncio.get_event_loop()
-        self._transport = await loop.create_connection(lambda: ClientProtocol(self), self.address, self.port)
+    async def connect_loop(self):
+        while not self._transport.is_closing():
+            asyncio.sleep(0)
 
     def handle_message(self, packet: dict):
         try:
@@ -80,49 +68,65 @@ class Client:
             pass
 
     def write(self, msg: packets.Packet):
-        self._transport[1].write(msg)
+        self._protocol.write(msg)
+
+    def send_request(self, future: asyncio.Future,
+                     msg: packets.Packet, expected_response: Type[packets.Packet]):
+        self._protocol.send_request(future, msg, expected_response)
 
     def close(self):
-        if self._transport is not None:
+        if self._transport is not None and not self._transport.is_closing():
             self.write(packets.Goodbye())
-            self._transport[0].close()
+            self._transport.close()
         try:
             self.handler.handle_disconnect()
         except KeyError:
             pass
 
-    def get_server_info(self):
-        self.write(packets.ServerInfoRequest(packets.ServerInfoRequest.ServerInfoRequestType.FULL))
+    async def get_server_info(self):
+        future = asyncio.Future()
+        self.send_request(future,
+                          packets.ServerInfoRequest(packets.ServerInfoRequest.ServerInfoRequestType.FULL),
+                          packets.ServerInfoResponse)
+        result = await future
+        self.challenge = result['auth_challenge']
+        return result
 
-    def join_server(self, name: str, password: str = None):
+    async def join_server(self, name: str, password: str = None):
         self.player_name = name
         sha256 = hashlib.sha256()
         if password is not None:
             sha256.update(password.encode("utf-8"))
         sha256.update(self.challenge)
-        self.write(packets.JoinRequest(name, sha256.digest()))
+        future = asyncio.Future()
+        self.send_request(future, packets.JoinRequest(name, sha256.digest()), packets.JoinResponse)
+        result = await future
+        # Parse response
+        result_codes = packets.JoinResponse.JoinResult
+        if result['result_code'] == result_codes.SUCCESS:
+            return result
+        elif result['result_code'] == result_codes.SERVER_FULL:
+            raise ConnectionError("The server is full.")
+        elif result['result_code'] == result_codes.BAD_PASSWORD:
+            raise ConnectionError("The password was incorrect.")
+        elif result['result_code'] == result_codes.BANNED:
+            raise ConnectionError("You are banned.\nReason: {}".format(result['result_msg']))
+        elif result['result_code'] == result_codes.OTHER:
+            raise ConnectionError("You cannot join for the following reason:\n{}".format(result['result_msg']))
+        else:
+            raise ConnectionError("The join result was not understood: {}".format(result['result_code']))
 
-    def join_room(self, room_no: int):
+    async def get_rooms(self):
+        future = asyncio.Future()
+        self.send_request(future, packets.RoomListRequest(), packets.RoomListResponse)
+        return await future
+
+    async def join_room(self, room_no: int):
         raise NotImplementedError
 
 
 class MockClientHandler(ClientHandler):
-
-    def handle_server_info_response(self, packet: dict):
-        self.client.challenge = packet['auth_challenge']
-        self.client.join_server("longboi", password="abcd")
-
-    def handle_join_response(self, packet: dict):
-        pass
-
-    def join_room(self, room_no: int):
-        sha256 = hashlib.sha256()
-        sha256.update("abcd".encode("utf-8"))
-        sha256.update(self.client.challenge)
-        self.respond(packets.JoinRoomRequest(room_no, sha256.digest()))
-
-    def handle_goodbye_packet(self, packet: dict):
-        print("disconnect")
+    pass
 
 
 class ClientProtocol(asyncio.Protocol):
@@ -131,9 +135,18 @@ class ClientProtocol(asyncio.Protocol):
         super().__init__()
         self.client = client
         self.buffer = None
+        # Maps packet IDs to futures
+        self.futures = dict()
 
     def write(self, message: packets.Packet):
         self.transport.write(message.encode())
+
+    def send_request(self, future: asyncio.Future,
+                     message: packets.Packet, expected_response: Type[packets.Packet]):
+        self.write(message)
+        if expected_response.msgid not in self.futures:
+            self.futures[expected_response.msgid] = list()
+        self.futures[expected_response.msgid].append(future)
 
     def connection_made(self, transport: asyncio.Transport):
         self.transport = transport
@@ -156,6 +169,12 @@ class ClientProtocol(asyncio.Protocol):
             msg = msgpack.unpackb(self.buffer[4:msg_size+4], encoding='utf-8')
             print(msg)
             try:
+                # Fulfill all futures that are waiting on this packet
+                if msg['id'] in self.futures:
+                    for future in self.futures[msg['id']]:
+                        future.set_result(msg)
+                    del self.futures[msg['id']]
+                # Call general message handler
                 loop = asyncio.get_event_loop()
                 loop.call_soon_threadsafe(self.client.handle_message, msg)
             except KeyError:
@@ -172,9 +191,16 @@ if __name__ == '__main__':
     #    f.write(binascii.hexlify(packets.ServerInfoRequest(packets.ServerInfoRequest.ServerInfoRequestType.BASIC).encode()).decode("utf-8"))
     #with open("R:/hope2", "w") as f:
     #    f.write(binascii.hexlify(packets.JoinRequest("topokeke", None).encode()).decode("utf-8"))
+    loop = asyncio.get_event_loop()
     client = Client('75.1.215.23', port='42505')
     handler = MockClientHandler(client)
     client.handler = handler
-    client.connect()
-    client.get_server_info()
-    asyncio.get_event_loop().run_forever()
+    async def test():
+        await client.connect()
+        await client.get_server_info()
+        await client.join_server("longboi", "abcd")
+        rooms = await client.get_rooms()
+        print(rooms)
+        client.close()
+    test_task = loop.create_task(test())
+    loop.run_until_complete(test_task)

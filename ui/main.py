@@ -1,4 +1,6 @@
 from PyQt5 import QtCore, QtWidgets, uic
+
+from ui.rooms import Rooms
 from ui.viewport import Viewport
 from ui.sound_mixer import SoundMixer
 from ui.ooc import OOCChat
@@ -15,6 +17,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.load_widgets()
         self.show()
+        try:
+            Rooms(client, self).exec_()
+        except:
+            msgbox = QtWidgets.QMessageBox()
+            msgbox.critical(self, "Rooms Error", "There was an error retrieving the room list.",
+                            QtWidgets.QMessageBox.Ok)
+            self.close()
 
     def load_widgets(self):
         # self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.viewport)
