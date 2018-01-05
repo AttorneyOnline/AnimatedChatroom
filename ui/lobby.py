@@ -4,9 +4,6 @@ from network.client.client import Client, ClientHandler
 from ui.main import MainWindow
 
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
-
-import hashlib
 from network import packets
 
 
@@ -69,7 +66,7 @@ class Lobby(QtWidgets.QMainWindow):
         loading.show()
 
     def _connect_success(self, client):
-        self.main = MainWindow(client, self)
+        self.main = MainWindow(client, None)
         # self.main.show()
         # Code below causes application to close.
         # self.hide()
@@ -98,20 +95,20 @@ class ClientThread(QtCore.QThread):
     def run(self):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
+        self._disconnect_future = self.loop.create_future()
         self.loop.run_until_complete(self.connect())
-        #self.loop.run_until_complete(self._client.connect_loop())
-        self.loop.run_forever()
-        # TODO: This loop doesn't stop until the application is closed.
+        self.loop.run_until_complete(self._disconnect_future)
         print("Client thread closed.")
 
     async def connect(self):
         self.set_status.emit("Connecting to server...")
         self.set_progress.emit(0)
-        await self._client.connect()
+        await self._client.connect(self._disconnect_future)
 
         self.set_status.emit("Getting server info...")
         self.set_progress.emit(20)
         server_info = await self._client.get_server_info()
+        self._client.server_info = server_info
         password = None
         try:
             if server_info['protection'] == packets.ServerInfoResponse.Protection.JOIN_WITH_PASSWORD:
@@ -121,13 +118,16 @@ class ClientThread(QtCore.QThread):
             await self._client.join_server("longboi", password)
         except InterruptedError:
             self._client.close()
-            self.on_disconnect()
+            self.on_disconnect.emit()
+            return
         except ConnectionError as e:
             self._client.close()
             self.error.emit(str(e))
+            return
         except Exception as e:
             self._client.close()
             self.on_exception.emit(e)
+            return
 
         # TODO: download assets
 

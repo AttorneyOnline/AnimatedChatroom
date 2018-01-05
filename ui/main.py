@@ -16,10 +16,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.viewport = Viewport(self)
 
         self.load_widgets()
+        self.setWindowTitle("{} - Animated Chatroom".format(self._client.server_info['name']))
         self.show()
         try:
-            Rooms(client, self).exec_()
-        except:
+            rooms = Rooms(client, parent=self)
+            rooms.setWindowModality(QtCore.Qt.WindowModal)
+            rooms.show()
+        except Exception as e:
+            print(str(e))
             msgbox = QtWidgets.QMessageBox()
             msgbox.critical(self, "Rooms Error", "There was an error retrieving the room list.",
                             QtWidgets.QMessageBox.Ok)

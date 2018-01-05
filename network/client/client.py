@@ -31,9 +31,6 @@ class ClientHandler:
     def handle_exception(self, exc: Exception):
         pass
 
-    def handle_Goodbye(self, packet: dict):
-        print("disconnect")
-
 
 class Client:
 
@@ -43,17 +40,15 @@ class Client:
         self.handler = None
         self._transport = None
         self._protocol = None
+        self.server_info = None
         self.challenge = None
         self.rooms = None
 
-    async def connect(self):
+    async def connect(self, disconnect_future: asyncio.Future):
         loop = asyncio.get_event_loop()
         self._transport, self._protocol = \
-            await loop.create_connection(lambda: ClientProtocol(self), self.address, self.port)
-
-    async def connect_loop(self):
-        while not self._transport.is_closing():
-            asyncio.sleep(0)
+            await loop.create_connection(lambda: ClientProtocol(self, disconnect_future),
+                                         self.address, self.port)
 
     def handle_message(self, packet: dict):
         try:
@@ -121,8 +116,16 @@ class Client:
         self.send_request(future, packets.RoomListRequest(), packets.RoomListResponse)
         return await future
 
-    async def join_room(self, room_no: int):
-        raise NotImplementedError
+    async def join_room(self, room_id: int, password: str = None):
+        future = asyncio.Future()
+        auth_response = None
+        if password is not None:
+            sha256 = hashlib.sha256()
+            sha256.update(password.encode("utf-8"))
+            sha256.update(self.challenge)
+            auth_response = sha256.digest()
+        self.send_request(future, packets.JoinRoomRequest(room_id, auth_response), packets.JoinRoomResponse)
+        return await future
 
 
 class MockClientHandler(ClientHandler):
@@ -131,58 +134,66 @@ class MockClientHandler(ClientHandler):
 
 class ClientProtocol(asyncio.Protocol):
 
-    def __init__(self, client):
+    def __init__(self, client, disconnect_future: asyncio.Future = None):
         super().__init__()
-        self.client = client
-        self.buffer = None
+        self._client = client
+        self._buffer = None
         # Maps packet IDs to futures
-        self.futures = dict()
+        self._futures = dict()
+        self._disconnect_future = disconnect_future
 
     def write(self, message: packets.Packet):
+        if self.transport.is_closing():
+            raise ConnectionError("Connection is already closed")
         self.transport.write(message.encode())
 
     def send_request(self, future: asyncio.Future,
                      message: packets.Packet, expected_response: Type[packets.Packet]):
         self.write(message)
-        if expected_response.msgid not in self.futures:
-            self.futures[expected_response.msgid] = list()
-        self.futures[expected_response.msgid].append(future)
+        if expected_response.msgid not in self._futures:
+            self._futures[expected_response.msgid] = list()
+        self._futures[expected_response.msgid].append(future)
 
     def connection_made(self, transport: asyncio.Transport):
         self.transport = transport
 
     def connection_lost(self, exc: Exception):
         print("Connection lost:", exc)
+        for futures in self._futures.values():
+            for future in futures:
+                future.cancel()
+        if self._disconnect_future is not None:
+            self._disconnect_future.set_result(exc)
 
     def data_received(self, data: bytes):
         # Put it in a buffer and wait until it's filled
-        if self.buffer is not None:
-            self.buffer += data
+        if self._buffer is not None:
+            self._buffer += data
         else:
-            self.buffer = bytearray(data)
-        if len(self.buffer) == 0:
+            self._buffer = bytearray(data)
+        if len(self._buffer) == 0:
             return
-        msg_size = struct.unpack_from("<I", self.buffer)[0]
+        msg_size = struct.unpack_from("<I", self._buffer)[0]
         # First four bytes of a message contain the length (uint32 little-endian).
-        if len(self.buffer) >= msg_size + 4:
+        if len(self._buffer) >= msg_size + 4:
             # Handle the packet
-            msg = msgpack.unpackb(self.buffer[4:msg_size+4], encoding='utf-8')
+            msg = msgpack.unpackb(self._buffer[4:msg_size + 4], encoding='utf-8')
             print(msg)
             try:
                 # Fulfill all futures that are waiting on this packet
-                if msg['id'] in self.futures:
-                    for future in self.futures[msg['id']]:
+                if msg['id'] in self._futures:
+                    for future in self._futures[msg['id']]:
                         future.set_result(msg)
-                    del self.futures[msg['id']]
+                    del self._futures[msg['id']]
                 # Call general message handler
                 loop = asyncio.get_event_loop()
-                loop.call_soon_threadsafe(self.client.handle_message, msg)
+                loop.call_soon_threadsafe(self._client.handle_message, msg)
             except KeyError:
                 print("Unknown packet!")
             # Handle the other part of the packet (there might be two messages
             # wedged into one packet)
-            remaining = self.buffer[msg_size+4:]
-            self.buffer = None
+            remaining = self._buffer[msg_size + 4:]
+            self._buffer = None
             self.data_received(remaining)
 
 if __name__ == '__main__':

@@ -11,11 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Select Room</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QListView" name="list_rooms"/>
+    <widget class="QListWidget" name="list_rooms"/>
    </item>
    <item row="1" column="0">
     <widget class="QDialogButtonBox" name="buttons">
