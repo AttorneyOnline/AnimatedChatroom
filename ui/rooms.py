@@ -36,9 +36,10 @@ class Rooms(QtWidgets.QDialog):
         else:
             room = rooms_selected[0]
             try:
+                password = None
                 if room.password:
-                    self.get_password(room)
-                join_task = self.join_room(room)
+                    password = self.get_password(room)
+                join_task = self.join_room(room, password=password)
                 result_type = JoinRoomResponse.JoinRoomResult
                 if join_task['result_code'] == result_type.SUCCESS:
                     self.done(QtWidgets.QDialog.Accepted)
