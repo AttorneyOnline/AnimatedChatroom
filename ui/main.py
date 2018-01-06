@@ -4,6 +4,7 @@ from ui.rooms import Rooms
 from ui.viewport import Viewport
 from ui.sound_mixer import SoundMixer
 from ui.ooc import OOCChat
+from ui.ic import ICChat
 from network.client.client import Client
 
 
@@ -35,6 +36,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.viewport)
         # self.addDockWidget(QtCore.Qt.RightDockWidgetArea, SoundMixer(self))
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, OOCChat(self))
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, ICChat(self))
 
     def closeEvent(self, event):
         self._client.close()

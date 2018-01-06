@@ -1,6 +1,7 @@
 import asyncio
 import traceback
 
+import sys
 from PyQt5 import QtCore, QtWidgets, uic, QtGui
 
 from network import packets
@@ -188,11 +189,16 @@ class Loading(QtWidgets.QDialog):
         self.deleteLater()
 
     def on_exception(self, exc: Exception):
+        # TODO: move this elsewhere
         msgbox = QtWidgets.QMessageBox(self)
-        msgbox.setDetailedText(traceback.format_exc())
+        msgbox.setDetailedText(f'{"".join(traceback.format_tb(exc.__traceback__))}\n{str(exc)}')
         mono_font_name = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.FixedFont).family()
         msgbox.setStyleSheet(
-            f'QTextEdit {{ background-color: #272822; color: #fff; font-family: {mono_font_name}; min-width: 400px; }}')
+            f'QTextEdit {{ background-color: #272822;'
+            f'color: #fff;'
+            f'font-family: {mono_font_name};'
+            f'min-width: 600px;'
+            f'min-height: 400px; }}')
         msgbox.setWindowTitle("Connection Error")
         msgbox.setText("Failed to connect to server.")
         msgbox.setWindowModality(QtCore.Qt.WindowModal)
