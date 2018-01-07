@@ -58,10 +58,11 @@ class ServerInfoResponse(Packet):
 class JoinRequest(Packet):
     msgid = 'JoinRequest'
 
-    def __init__(self, player_name: str, auth_response: bytes = None):
+    def __init__(self, player_name: str, auth_response: bytes = None, master: bool = True):
         self.id = self.msgid
         self.player_name = player_name
         self.auth_response = auth_response
+        self.master = master
 
 
 class JoinResponse(Packet):
@@ -113,15 +114,22 @@ class JoinRoomResponse(Packet):
 
 
 class Chat(Packet):
-    msgid = 'Chat'
+    msgid = 'ChatMessage'
 
-    def __init__(self, player_id: int, emote: str, msg: str, timescale: float = 1, flip: bool = False):
+    # def __init__(self, player_id: int, emote: str, msg: str, timescale: float = 1, flip: bool = False):
+    #     self.id = self.msgid
+    #     self.player_id = player_id
+    #     self.emote = emote
+    #     self.msg = msg
+    #     self.timescale = timescale
+    #     self.flip = flip
+
+    def __init__(self, room_id: int, msg: str, emote: str, preanimation: str):
         self.id = self.msgid
-        self.player_id = player_id
-        self.emote = emote
+        self.room_id = room_id
         self.msg = msg
-        self.timescale = timescale
-        self.flip = flip
+        self.emote = emote
+        self.preanimation = preanimation
 
 
 class ChatOOC(Packet):

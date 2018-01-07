@@ -14,6 +14,7 @@ class Lobby(QtWidgets.QMainWindow):
         super().__init__()
         self.master_server = None
         self.client_threads = []
+        self.windows = []
         uic.loadUi("ui/lobby.ui", self)
         self.show()
 
@@ -68,7 +69,7 @@ class Lobby(QtWidgets.QMainWindow):
         loading.show()
 
     def _connect_success(self, client):
-        self.main = MainWindow(client, None)
+        self.windows.append(MainWindow(client, None))
         # self.main.show()
         # Code below causes application to close.
         # self.hide()

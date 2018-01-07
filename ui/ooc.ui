@@ -47,7 +47,7 @@
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
+           <verstretch>1</verstretch>
           </sizepolicy>
          </property>
          <property name="minimumSize">
@@ -82,11 +82,20 @@ p, li { white-space: pre-wrap; }
            <height>24</height>
           </size>
          </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>24</height>
+          </size>
+         </property>
          <property name="sizeAdjustPolicy">
           <enum>QAbstractScrollArea::AdjustToContents</enum>
          </property>
          <property name="plainText">
           <string/>
+         </property>
+         <property name="placeholderText">
+          <string>Type an out-of-character message…</string>
          </property>
         </widget>
        </item>

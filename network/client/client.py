@@ -34,9 +34,12 @@ class ClientHandler:
 
 class Client:
 
-    def __init__(self, address, port='42505'):
+    def __init__(self, address, port='42505', master=True):
         self.address = address
         self.port = port
+
+        # Whether or not this client is subscribed to events.
+        self.master = master
 
         # A general handler. Useful for handling messages that we did not expect.
         self.handler = None
@@ -50,7 +53,9 @@ class Client:
 
         # This challenge/nonce is reused across the entire session.
         self.challenge = None
+
         self.rooms = None
+        self.current_room_id = None
 
         # loop hooks on once the connection is established. The client may be instantiated
         # on one thread but then the connect may be called on another one.
@@ -110,7 +115,7 @@ class Client:
             sha256.update(password.encode("utf-8"))
         sha256.update(self.challenge)
         future = asyncio.Future()
-        self.send_request(future, packets.JoinRequest(name, sha256.digest()), packets.JoinResponse)
+        self.send_request(future, packets.JoinRequest(name, sha256.digest(), self.master), packets.JoinResponse)
         result = await future
         # Parse response
         result_codes = packets.JoinResponse.JoinResult
@@ -144,6 +149,13 @@ class Client:
             sha256.update(self.challenge)
             auth_response = sha256.digest()
         self.send_request(future, packets.JoinRoomRequest(room_id, auth_response), packets.JoinRoomResponse)
+        result = await future
+        self.current_room_id = room_id
+        return result
+
+    async def send_message(self, room_id: int, text: str, emote: str, preanimation: str = None):
+        future = asyncio.Future()
+        self.send_request(future, packets.Chat(room_id, text, emote, preanimation), packets.Chat)
         return await future
 
 
