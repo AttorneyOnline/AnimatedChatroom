@@ -12,5 +12,5 @@ class ICChat(QtWidgets.QDockWidget):
     def sendMessage(self):
         msg = self.chat_entry.document().toPlainText()
         client = self.parent().client
-        asyncio.run_coroutine_threadsafe(client.send_message(client.current_room_id, "123456", msg, "emote1"),
+        asyncio.run_coroutine_threadsafe(client.send_message(room_id=client.current_room_id, text=msg, emote="emote1"),
                                          client.loop)

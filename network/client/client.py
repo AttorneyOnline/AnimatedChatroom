@@ -6,6 +6,7 @@ import msgpack
 import struct
 import hashlib
 from network import packets
+from network.unique import unique_id
 
 
 class ClientHandler:
@@ -34,12 +35,15 @@ class ClientHandler:
 
 class Client:
 
-    def __init__(self, address, port='42505', master=True):
+    def __init__(self, address, port='42505', master=True, thread=None):
         self.address = address
         self.port = port
 
         # Whether or not this client is subscribed to events.
         self.master = master
+
+        # May be accessed by other classes for easier signalling.
+        self.thread = thread
 
         # A general handler. Useful for handling messages that we did not expect.
         self.handler = None
@@ -115,7 +119,11 @@ class Client:
             sha256.update(password.encode("utf-8"))
         sha256.update(self.challenge)
         future = asyncio.Future()
-        self.send_request(future, packets.JoinRequest(name, sha256.digest(), self.master), packets.JoinResponse)
+        request = packets.JoinRequest(player_name=name,
+                                      player_id=unique_id(),
+                                      auth_response=sha256.digest(),
+                                      master=self.master)
+        self.send_request(future, request, packets.JoinResponse)
         result = await future
         # Parse response
         result_codes = packets.JoinResponse.JoinResult
@@ -153,9 +161,10 @@ class Client:
         self.current_room_id = room_id
         return result
 
-    async def send_message(self, room_id: int, text: str, emote: str, preanimation: str = None):
+    async def send_message(self, *, room_id: int, text: str, emote: str, preanimation: str = None):
         future = asyncio.Future()
-        self.send_request(future, packets.Chat(room_id, text, emote, preanimation), packets.Chat)
+        self.send_request(future, packets.Chat(room_id=room_id, text=text,
+                                               emote=emote, preanimation=preanimation), packets.Chat)
         return await future
 
 
