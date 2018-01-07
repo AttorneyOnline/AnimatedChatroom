@@ -24,7 +24,7 @@ class ExpandingPlainTextEdit(QtWidgets.QTextEdit):
         self.setMaximumHeight(target_height)
 
     def keyPressEvent(self, keyEvent: QtGui.QKeyEvent):
-        if keyEvent.key() == QtCore.Qt.Key_Return:
+        if keyEvent.key() in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter):
             self.returnPressed.emit()
         else:
             QtWidgets.QTextEdit.keyPressEvent(self, keyEvent)
