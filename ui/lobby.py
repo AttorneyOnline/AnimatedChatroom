@@ -6,7 +6,8 @@ from PyQt5 import QtCore, QtWidgets, uic, QtGui
 
 from network import packets
 from network.client.client import Client, ClientHandler
-from ui.main import MainWindow
+from . import show_exception_dialog
+from .main import MainWindow
 
 
 class Lobby(QtWidgets.QMainWindow):
@@ -99,14 +100,14 @@ class ClientThread(QtCore.QThread):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
         self._disconnect_future = self.loop.create_future()
-        self.loop.run_until_complete(self.connect())
+        self.loop.run_until_complete(self._connect())
         try:
             self.loop.run_until_complete(self._disconnect_future)
         except asyncio.CancelledError:
             pass
         print("Client thread closed.")
 
-    async def connect(self):
+    async def _connect(self):
         self.set_status.emit("Connecting to server...")
         self.set_progress.emit(0)
         try:
@@ -126,7 +127,7 @@ class ClientThread(QtCore.QThread):
         try:
             if server_info['protection'] == packets.ServerInfoResponse.Protection.JOIN_WITH_PASSWORD:
                 # Blocking queued connection - will block until dialog is closed
-                password = await self.ask_password()
+                password = await self._ask_password()
                 print(password)
             await self._client.join_server("longboi", password)
         except InterruptedError:
@@ -148,7 +149,7 @@ class ClientThread(QtCore.QThread):
         self.set_progress.emit(90)
         self.success.emit()
 
-    async def ask_password(self):
+    async def _ask_password(self):
         future = asyncio.Future()
         self.open_password_dialog.emit(future)
         return await future
@@ -190,22 +191,7 @@ class Loading(QtWidgets.QDialog):
         self.deleteLater()
 
     def on_exception(self, exc: Exception):
-        # TODO: move this elsewhere
-        msgbox = QtWidgets.QMessageBox(self)
-        msgbox.setDetailedText(f'{"".join(traceback.format_tb(exc.__traceback__))}\n{str(exc)}')
-        mono_font_name = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.FixedFont).family()
-        msgbox.setStyleSheet(
-            f'QTextEdit {{ background-color: #272822;'
-            f'color: #fff;'
-            f'font-family: {mono_font_name};'
-            f'min-width: 600px;'
-            f'min-height: 400px; }}')
-        msgbox.setWindowTitle("Connection Error")
-        msgbox.setText("Failed to connect to server.")
-        msgbox.setWindowModality(QtCore.Qt.WindowModal)
-        msgbox.setIcon(QtWidgets.QMessageBox.Critical)
-        msgbox.adjustSize()
-        msgbox.exec_()
+        show_exception_dialog(self, exc)
         self.on_disconnect()
 
     def on_disconnect(self):

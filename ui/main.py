@@ -1,10 +1,11 @@
 from PyQt5 import QtCore, QtWidgets, uic
 
-from ui.rooms import Rooms
-from ui.viewport import Viewport
-from ui.sound_mixer import SoundMixer
-from ui.ooc import OOCChat
-from ui.ic import ICChat
+from . import show_exception_dialog
+from .rooms import Rooms
+from .viewport import Viewport
+from .sound_mixer import SoundMixer
+from .ooc import OOCChat
+from .ic import ICChat
 from network.client.client import Client
 
 
@@ -14,6 +15,8 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi("ui/main.ui", self)
 
         self.client = client
+        self.client.thread.on_disconnect.connect(self.on_disconnect)
+        self.client.thread.exception.connect(self.on_exception)
         self.viewport = Viewport(self)
 
         # Windows/dock widgets: a mapping from widget type to the actual
@@ -34,6 +37,17 @@ class MainWindow(QtWidgets.QMainWindow):
             msgbox.critical(self, "Rooms Error", "There was an error retrieving the room list.",
                             QtWidgets.QMessageBox.Ok)
             self.close()
+
+    def on_disconnect(self):
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setWindowTitle("Disconnected")
+        msgbox.setText("You have been disconnected from the server.")
+        msgbox.setWindowModality(QtCore.Qt.WindowModal)
+        msgbox.setIcon(QtWidgets.QMessageBox.Warning)
+        msgbox.exec_()
+
+    def on_exception(self, exc: Exception):
+        show_exception_dialog(self, exc)
 
     def load_widgets(self):
         # self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.viewport)
