@@ -16,7 +16,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.client = client
         self.client.thread.on_disconnect.connect(self.on_disconnect)
-        self.client.thread.exception.connect(self.on_exception)
+        self.client.thread.on_exception.connect(self.on_exception)
         self.viewport = Viewport(self)
 
         # Windows/dock widgets: a mapping from widget type to the actual

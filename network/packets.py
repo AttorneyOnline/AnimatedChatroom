@@ -1,8 +1,10 @@
 """
 Contains all network packets.
 """
-from enum import Enum
 import msgpack
+import logging
+
+logger = logging.getLogger("ac.net.packets")
 
 
 class Packet:
@@ -10,7 +12,7 @@ class Packet:
 
     def encode(self):
         """Encode the message using msgpack."""
-        print("writing:", self.__dict__)
+        logger.debug("writing: %s", self.__dict__)
         return msgpack.packb(self.__dict__, use_bin_type=True)
 
 

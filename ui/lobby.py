@@ -1,7 +1,8 @@
 import asyncio
-import traceback
+import random
+import threading
+import logging
 
-import sys
 from PyQt5 import QtCore, QtWidgets, uic, QtGui
 
 from network import packets
@@ -9,12 +10,14 @@ from network.client.client import Client, ClientHandler
 from . import show_exception_dialog
 from .main import MainWindow
 
+ui_logger = logging.getLogger("ac.ui.lobby")
+
 
 class Lobby(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.master_server = None
-        self.client_threads = []
+        self.client_threads = set()
         self.windows = []
         uic.loadUi("ui/lobby.ui", self)
         self.show()
@@ -51,11 +54,12 @@ class Lobby(QtWidgets.QMainWindow):
                 self.open_direct_connect_dialog()
 
     def _start_connect(self, hostname, port):
-        client = Client(hostname, port=port)
+        client = Client(hostname, port=port, master=True)
         loading = Loading(client, self)
         loading.open_main.connect(self._connect_success)
 
-        client_thread = ClientThread(client, parent=loading)
+        thread_id_future = asyncio.Future()
+        client_thread = ClientThread(client, parent=loading, thread_id_future=thread_id_future)
         client_thread.open_password_dialog.connect(loading.ask_password, QtCore.Qt.BlockingQueuedConnection)
         client_thread.on_exception.connect(loading.on_exception, QtCore.Qt.BlockingQueuedConnection)
         client_thread.on_disconnect.connect(loading.on_disconnect)
@@ -63,10 +67,11 @@ class Lobby(QtWidgets.QMainWindow):
         client_thread.error.connect(loading.error, QtCore.Qt.BlockingQueuedConnection)
         client_thread.set_status.connect(loading.set_status)
         client_thread.set_progress.connect(loading.set_progress)
+        client_thread.thread_end.connect(self._thread_stopped)
 
         client.handler = Loading.LoadingHandler(client, client_thread)
         client_thread.start()
-        self.client_threads.append(client_thread)
+        thread_id_future.add_done_callback(lambda: self.client_threads.add(client_thread))
         loading.show()
 
     def _connect_success(self, client):
@@ -75,13 +80,20 @@ class Lobby(QtWidgets.QMainWindow):
         # Code below causes application to close.
         # self.hide()
 
+    def _thread_stopped(self, thread: QtCore.QThread):
+        self.client_threads.discard(thread)
+        ui_logger.debug("Discarded thread %d from thread list.", thread.thread_id)
+
 
 class ClientThread(QtCore.QThread):
+
+    client_logger = logging.getLogger("ac.t.client")
 
     on_exception = QtCore.pyqtSignal(Exception)
     on_disconnect = QtCore.pyqtSignal()
     success = QtCore.pyqtSignal()
     error = QtCore.pyqtSignal(str)
+    thread_end = QtCore.pyqtSignal(QtCore.QThread)
 
     set_status = QtCore.pyqtSignal(str)
     set_progress = QtCore.pyqtSignal(int)
@@ -91,12 +103,32 @@ class ClientThread(QtCore.QThread):
 
     open_password_dialog = QtCore.pyqtSignal(asyncio.Future)
 
-    def __init__(self, client, parent=None):
-        self._client = client
-        self._parent = parent
+    def __init__(self, client, parent=None, thread_id_future: asyncio.Future = None):
         super().__init__()
+        self._client = client
+        self._client.thread = self
+        self._parent = parent
+        self._thread_id_future = thread_id_future
+
+        # To be populated after the thread starts.
+        self.thread_id = None
+
+    def __hash__(self):
+        """Get the identifier of the client thread."""
+        return self.thread_id
+
+    def __eq__(self, other):
+        """Naive equals."""
+        return self.__hash__() == other.__hash__()
+
+    def __del__(self):
+        self.client_logger.debug("Thread {} freed", self.thread_id)
 
     def run(self):
+        self.thread_id = threading.get_ident()
+        self.client_logger.info("Master client thread %d spawned", self.thread_id)
+        if self._thread_id_future is not None:
+            self._thread_id_future.set_result(self.thread_id)
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
         self._disconnect_future = self.loop.create_future()
@@ -105,7 +137,8 @@ class ClientThread(QtCore.QThread):
             self.loop.run_until_complete(self._disconnect_future)
         except asyncio.CancelledError:
             pass
-        print("Client thread closed.")
+        self.thread_end.emit(self)
+        self.client_logger.info("Client thread closed.")
 
     async def _connect(self):
         self.set_status.emit("Connecting to server...")
@@ -230,4 +263,6 @@ class Loading(QtWidgets.QDialog):
         self.progress_loading.setValue(val)
 
     def cancel(self):
+        ui_logger.info("Canceling loading process!")
+        self.client.close()
         self.close()

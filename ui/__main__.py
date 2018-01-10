@@ -2,10 +2,10 @@ import sys
 
 from PyQt5 import QtWidgets
 
-from ui.main import MainWindow
 from ui.lobby import Lobby
 
 import sys
+import logging
 
 # Exception handler code:
 # https://stackoverflow.com/a/37837374/2958458
@@ -27,6 +27,12 @@ sys.excepthook = my_exception_hook
 
 
 def main():
+    # Start logger
+    logging.basicConfig(format='[%(name)s][%(thread)d] %(module)s @%(lineno)d : %(message)s')
+    default_logger = logging.getLogger('ac')
+    default_logger.setLevel(logging.DEBUG)
+    default_logger.info("Logger started")
+
     app = QtWidgets.QApplication(sys.argv)
     #main_window = MainWindow()
     lobby = Lobby()

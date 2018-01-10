@@ -5,9 +5,11 @@ from typing import Type
 import msgpack
 import struct
 import hashlib
+import logging
 from network import packets
 from network.unique import unique_id
 
+client_logger = logging.getLogger("ac.net.client")
 
 class ClientHandler:
 
@@ -67,13 +69,17 @@ class Client:
 
     async def connect(self, disconnect_future: asyncio.Future = None):
         self.loop = asyncio.get_event_loop()
+        client_logger.info("Establishing connection to %s:%d", self.address, self.port)
         try:
             self._transport, self._protocol = \
                 await self.loop.create_connection(lambda: ClientProtocol(self, disconnect_future),
                                              self.address, self.port)
-        except OSError:
+        except OSError as e:
+            client_logger.warning("Failed to establish connection:")
+            client_logger.warning("%s", str(e))
             disconnect_future.cancel()
             raise
+        client_logger.info("Established connection to %s:%d", self.address, self.port)
 
     def handle_message(self, packet: dict):
         try:
@@ -198,7 +204,7 @@ class ClientProtocol(asyncio.Protocol):
         self.transport = transport
 
     def connection_lost(self, exc: Exception):
-        print("Connection lost:", exc)
+        client_logger.info("Connection lost: %s", exc)
         for futures in self._futures.values():
             for future in futures:
                 future.cancel()
@@ -218,7 +224,7 @@ class ClientProtocol(asyncio.Protocol):
         if len(self._buffer) >= msg_size + 4:
             # Handle the packet
             msg = msgpack.unpackb(self._buffer[4:msg_size + 4], encoding='utf-8')
-            print(msg)
+            client_logger.debug(msg)
             try:
                 # Fulfill all futures that are waiting on this packet
                 if msg['id'] in self._futures:
@@ -229,7 +235,7 @@ class ClientProtocol(asyncio.Protocol):
                 loop = asyncio.get_event_loop()
                 loop.call_soon_threadsafe(self._client.handle_message, msg)
             except KeyError:
-                print("Unknown packet!")
+                client_logger.warn("Unknown packet!")
             # Handle the other part of the packet (there might be two messages
             # wedged into one packet)
             remaining = self._buffer[msg_size + 4:]
